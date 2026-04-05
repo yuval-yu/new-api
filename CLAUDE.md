@@ -1,14 +1,65 @@
-# CLAUDE.md — Project Conventions for new-api
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+> 🔴 与用户交流时必须使用中文。
 
 ## Overview
 
-This is an AI API gateway/proxy built with Go. It aggregates 40+ upstream AI providers (OpenAI, Claude, Gemini, Azure, AWS Bedrock, etc.) behind a unified API, with user management, billing, rate limiting, and an admin dashboard.
+AI API gateway/proxy built with Go. Aggregates 40+ upstream AI providers (OpenAI, Claude, Gemini, Azure, AWS Bedrock, etc.) behind a unified API, with user management, billing, rate limiting, and an admin dashboard.
+
+## Build & Dev Commands
+
+### Backend (Go)
+
+```bash
+# Build
+go build -ldflags "-s -w" -o new-api
+
+# Run (starts on port 3000 by default, configurable via PORT env)
+./new-api
+
+# Run tests
+go test ./...
+
+# Run a single test
+go test ./service/ -run TestTextQuota
+
+# Run tests with verbose output
+go test -v ./relay/channel/claude/...
+```
+
+### Frontend (web/)
+
+```bash
+cd web
+bun install              # Install dependencies (prefer bun over npm/yarn)
+bun run dev              # Dev server (proxies to localhost:3000)
+bun run build            # Production build (output: web/dist/)
+bun run lint             # Check formatting (prettier)
+bun run lint:fix         # Fix formatting
+bun run eslint           # ESLint check
+bun run eslint:fix       # Fix lint issues
+bun run i18n:extract     # Extract i18n strings
+bun run i18n:sync        # Sync translations
+bun run i18n:lint        # Lint translations
+```
+
+### Docker
+
+```bash
+docker-compose up -d     # Full stack with PostgreSQL + Redis
+```
+
+### Environment Setup
+
+Copy `.env.example` to `.env`. Key vars: `SQL_DSN` (MySQL/PostgreSQL), `SQLITE_PATH` (default SQLite), `REDIS_CONN_STRING`, `SESSION_SECRET`. Without `SQL_DSN`, defaults to SQLite at `./new-api.db`.
 
 ## Tech Stack
 
 - **Backend**: Go 1.22+, Gin web framework, GORM v2 ORM
-- **Frontend**: React 18, Vite, Semi Design UI (@douyinfe/semi-ui)
-- **Databases**: SQLite, MySQL, PostgreSQL (all three must be supported)
+- **Frontend**: React 18, Vite, Semi Design UI (@douyinfe/semi-ui), Tailwind CSS
+- **Databases**: SQLite, MySQL, PostgreSQL (all three must be supported simultaneously)
 - **Cache**: Redis (go-redis) + in-memory cache
 - **Auth**: JWT, WebAuthn/Passkeys, OAuth (GitHub, Discord, OIDC, etc.)
 - **Frontend package manager**: Bun (preferred over npm/yarn/pnpm)
@@ -18,12 +69,12 @@ This is an AI API gateway/proxy built with Go. It aggregates 40+ upstream AI pro
 Layered architecture: Router -> Controller -> Service -> Model
 
 ```
+main.go        — Entry point: init resources, start Gin server, embed web/dist
 router/        — HTTP routing (API, relay, dashboard, web)
 controller/    — Request handlers
 service/       — Business logic
 model/         — Data models and DB access (GORM)
-relay/         — AI API relay/proxy with provider adapters
-  relay/channel/ — Provider-specific adapters (openai/, claude/, gemini/, aws/, etc.)
+relay/         — AI API relay/proxy (core request pipeline)
 middleware/    — Auth, rate limiting, CORS, logging, distribution
 setting/       — Configuration management (ratio, model, operation, system, performance)
 common/        — Shared utilities (JSON, crypto, Redis, env, rate-limit, etc.)
@@ -34,8 +85,28 @@ i18n/          — Backend internationalization (go-i18n, en/zh)
 oauth/         — OAuth provider implementations
 pkg/           — Internal packages (cachex, ionet)
 web/           — React frontend
-  web/src/i18n/  — Frontend internationalization (i18next, zh/en/fr/ru/ja/vi)
 ```
+
+### Relay System (core complexity)
+
+The relay system proxies requests between clients and 30+ AI providers. Key flow:
+
+1. **Router** receives request → `relay/` handler (compatible_handler, claude_handler, gemini_handler, etc.)
+2. **Adaptor factory** (`relay/relay_adaptor.go`) selects provider adapter by `apiType`
+3. **Adapter** (`relay/channel/<provider>/adaptor.go`) implements the `Adaptor` interface:
+   - `ConvertOpenAIRequest` / `ConvertClaudeRequest` / `ConvertGeminiRequest` — format conversion
+   - `SetupRequestHeader` — inject auth, version headers
+   - `DoRequest` / `DoResponse` — execute HTTP call, parse response
+4. **RelayInfo** (`relay/common/relay_info.go`) — central context object carrying auth, channel config, billing, and request metadata (120+ fields)
+5. **Billing** — quota pre-consumption before request, adjustment after response
+
+**Adding a new channel adapter**: Create `relay/channel/<provider>/adaptor.go` implementing the `channel.Adaptor` interface from `relay/channel/adapter.go`, then register it in the factory in `relay/relay_adaptor.go`. See existing adapters (e.g., `relay/channel/claude/`) for patterns.
+
+**Task adapters** (`relay/channel/task/`) handle async operations (video generation, image tasks) via a separate `TaskAdaptor` interface.
+
+### Override system
+
+`relay/common/override.go` applies channel-level parameter and header overrides to upstream requests, enabling per-channel customization without code changes.
 
 ## Internationalization (i18n)
 
@@ -49,7 +120,6 @@ web/           — React frontend
 - Translation files: `web/src/i18n/locales/{lang}.json` — flat JSON, keys are Chinese source strings
 - Usage: `useTranslation()` hook, call `t('中文key')` in components
 - Semi UI locale synced via `SemiLocaleWrapper`
-- CLI tools: `bun run i18n:extract`, `bun run i18n:sync`, `bun run i18n:lint`
 
 ## Rules
 
