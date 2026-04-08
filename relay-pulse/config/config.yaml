@@ -1,5 +1,5 @@
-interval: "10m"       # 巡检间隔，可写成 "30s"、"1m"、"5m" 等
-slow_latency: "5s"   # 慢请求阈值，超过则从绿降为黄
+interval: "5m"       # 巡检间隔，可写成 "30s"、"1m"、"5m" 等
+slow_latency: "10s"   # 慢请求阈值，超过则从绿降为黄
 
 # 最大并发探测数
 max_concurrency: 15
