@@ -76,6 +76,56 @@ monitors:
     template: "cc-sonnet-arith"            # 引用 templates/ 目录下的模板（模板模式必填）
     channel: "mixed"
     api_key: "sk-PO0TyMy7av0pX746eR2YmrkH0p8aDBU9XidQzm84PVlexiBd"          # API 密钥（可选，建议用环境变量）
+
+  - provider: "xc"         # 服务商标识（必填）
+    service: "cc"              # 服务类型（必填）
+    category: "commercial"     # 分类（必填）: commercial 或 public
+    sponsor: "团队自有"         # 赞助者（必填）
+    price_max: 1.2             # 参考倍率（可选）: 显示为 "0.125 / 0.05~0.2"
+    listed_since: "2024-06-15" # 收录日期（可选）: 用于计算收录天数
+    # expires_at: "2025-12-31"   # 到期日期（可选）: 过期后自动降级并移入备板
+    base_url: "https://ai.centos.hk"    # 服务商基础地址（模板模式必填）
+    template: "cc-sonnet-arith"            # 引用 templates/ 目录下的模板（模板模式必填）
+    channel: "xc-claudeCode"
+    api_key: "sk-6mmwGr4UOlzhmIlJ7eHxuKVnASMg7hqJCHziOVn85k9uHUpK"          # API 密钥（可选，建议用环境变量）
+
+  - provider: "xc"         # 服务商标识（必填）
+    service: "cc"              # 服务类型（必填）
+    category: "commercial"     # 分类（必填）: commercial 或 public
+    sponsor: "团队自有"         # 赞助者（必填）
+    price_max: 2             # 参考倍率（可选）: 显示为 "0.125 / 0.05~0.2"
+    listed_since: "2024-06-15" # 收录日期（可选）: 用于计算收录天数
+    # expires_at: "2025-12-31"   # 到期日期（可选）: 过期后自动降级并移入备板
+    base_url: "https://ai.centos.hk"    # 服务商基础地址（模板模式必填）
+    template: "cc-sonnet-arith"            # 引用 templates/ 目录下的模板（模板模式必填）
+    channel: "xc-max"
+    api_key: "sk-YJ7SW6L1jyEg4FsQFeDz7PFEulrxX0ucz3E3XfVWexj7njlb"          # API 密钥（可选，建议用环境变量）
+
+  - provider: "xc"         # 服务商标识（必填）
+    service: "cc"              # 服务类型（必填）
+    category: "commercial"     # 分类（必填）: commercial 或 public
+    sponsor: "团队自有"         # 赞助者（必填）
+    price_max: 0.4             # 参考倍率（可选）: 显示为 "0.125 / 0.05~0.2"
+    listed_since: "2024-06-15" # 收录日期（可选）: 用于计算收录天数
+    # expires_at: "2025-12-31"   # 到期日期（可选）: 过期后自动降级并移入备板
+    base_url: "https://ai.centos.hk"    # 服务商基础地址（模板模式必填）
+    template: "cc-sonnet-arith"            # 引用 templates/ 目录下的模板（模板模式必填）
+    channel: "xc-cc逆向"
+    api_key: "sk-ze7O7OsSpsMYXzva5fgNgr7b0lwfTw8yGApc3zidie7lFcqA"          # API 密钥（可选，建议用环境变量）
+
+  - provider: "xc"         # 服务商标识（必填）
+    service: "cc"              # 服务类型（必填）
+    category: "commercial"     # 分类（必填）: commercial 或 public
+    sponsor: "团队自有"         # 赞助者（必填）
+    price_max: 0.6             # 参考倍率（可选）: 显示为 "0.125 / 0.05~0.2"
+    listed_since: "2024-06-15" # 收录日期（可选）: 用于计算收录天数
+    # expires_at: "2025-12-31"   # 到期日期（可选）: 过期后自动降级并移入备板
+    base_url: "https://ai.centos.hk"    # 服务商基础地址（模板模式必填）
+    template: "cc-sonnet-arith"            # 引用 templates/ 目录下的模板（模板模式必填）
+    channel: "xc-反重力"
+    api_key: "sk-yizDxDuXvvmkM4gP2v4mwiI4BTtIg8d45u7aO453uBYRUCO1"          # API 密钥（可选，建议用环境变量）
+
+
   # --- 示例：监测 Gemini ---
   # - provider: "google"
   #   service: "gm"
