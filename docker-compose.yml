@@ -83,9 +83,33 @@ services:
 #    ports:
 #      - "5432:5432"
 
+  relay-pulse:
+    image: ghcr.io/prehisle/relay-pulse:latest
+    container_name: relay-pulse
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./relay-pulse/config:/config
+      - relay-pulse-data:/data
+    environment:
+      - TZ=Asia/Shanghai
+      - MONITOR_SQLITE_PATH=/data/monitor.db
+      # API 密钥覆盖（格式：MONITOR_<PROVIDER>_<SERVICE>_API_KEY）
+      # - MONITOR_EXAMPLE_CC_API_KEY=sk-your-key
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - new-api-network
+
 volumes:
   mysql_data:
   pg_log_data:
+  relay-pulse-data:
 
 networks:
   new-api-network:

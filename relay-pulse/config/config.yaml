@@ -1,0 +1,87 @@
+interval: "10m"       # 巡检间隔，可写成 "30s"、"1m"、"5m" 等
+slow_latency: "5s"   # 慢请求阈值，超过则从绿降为黄
+
+# 最大并发探测数
+max_concurrency: 15
+
+# 错峰调度
+stagger_probes: true
+
+# 存储配置（SQLite）
+storage:
+  type: "sqlite"
+  sqlite:
+    path: "monitor.db"   # 实际路径由环境变量 MONITOR_SQLITE_PATH 覆盖为 /data/monitor.db
+
+# 标签系统
+enable_annotations: true
+
+# ============================================
+# 监测任务配置 —— 请按实际情况修改
+# ============================================
+#
+# 支持的模板（templates/ 目录）：
+#   CC (Claude Code): cc-haiku-arith, cc-sonnet-arith, cc-opus-arith
+#   CX (Codex):       cx-codex-arith, cx-gpt-arith
+#   GM (Gemini):      gm-flash-arith, gm-pro-arith
+#
+# 占位符说明：
+#   {{BASE_URL}}   — 来自 base_url
+#   {{API_KEY}}    — 来自 api_key（或环境变量）
+#   {{MODEL}}      — 来自 model / request_model
+#
+monitors:
+  # --- 示例：new-api 自身作为 Claude Code 接入点 ---
+  # - provider: "new-api-local"
+  #   provider_slug: "new-api-local"
+  #   provider_url: "http://new-api:3000"
+  #   service: "cc"
+  #   category: "self"
+  #   sponsor: "本地"
+  #   channel: "default"
+  #   base_url: "http://new-api:3000"
+  #   template: "cc-haiku-arith"
+  #   api_key: "sk-your-new-api-token"
+
+  # --- 示例：监测第三方 Claude Code 代理 ---
+  # - provider: "example-provider"
+  #   service: "cc"
+  #   category: "commercial"
+  #   sponsor: "示例"
+  #   channel: "default"
+  #   base_url: "https://api.example.com"
+  #   template: "cc-haiku-arith"
+  #   api_key: "sk-xxxxxxxx"
+  
+  - provider: "frank"         # 服务商标识（必填）
+    service: "cc"              # 服务类型（必填）
+    category: "commercial"     # 分类（必填）: commercial 或 public
+    sponsor: "团队自有"         # 赞助者（必填）
+    price_max: 0.2             # 参考倍率（可选）: 显示为 "0.125 / 0.05~0.2"
+    listed_since: "2024-06-15" # 收录日期（可选）: 用于计算收录天数
+    # expires_at: "2025-12-31"   # 到期日期（可选）: 过期后自动降级并移入备板
+    base_url: "https://api.frankai.cc"    # 服务商基础地址（模板模式必填）
+    template: "cc-sonnet-arith"            # 引用 templates/ 目录下的模板（模板模式必填）
+    channel: "max"
+    api_key: "sk-R13ucIUff26uwIxyZNoae5E00s7dz5yIMNb5YcnB4ufOpyCw"          # API 密钥（可选，建议用环境变量）
+
+  - provider: "frank"         # 服务商标识（必填）
+    service: "cc"              # 服务类型（必填）
+    category: "commercial"     # 分类（必填）: commercial 或 public
+    sponsor: "团队自有"         # 赞助者（必填）
+    price_max: 0.2             # 参考倍率（可选）: 显示为 "0.125 / 0.05~0.2"
+    listed_since: "2024-06-15" # 收录日期（可选）: 用于计算收录天数
+    # expires_at: "2025-12-31"   # 到期日期（可选）: 过期后自动降级并移入备板
+    base_url: "https://api.frankai.cc"    # 服务商基础地址（模板模式必填）
+    template: "cc-sonnet-arith"            # 引用 templates/ 目录下的模板（模板模式必填）
+    channel: "mixed"
+    api_key: "sk-PO0TyMy7av0pX746eR2YmrkH0p8aDBU9XidQzm84PVlexiBd"          # API 密钥（可选，建议用环境变量）
+  # --- 示例：监测 Gemini ---
+  # - provider: "google"
+  #   service: "gm"
+  #   category: "public"
+  #   sponsor: "官方直连"
+  #   channel: "direct"
+  #   base_url: "https://generativelanguage.googleapis.com"
+  #   template: "gm-flash-arith"
+  #   api_key: "AIza..."
